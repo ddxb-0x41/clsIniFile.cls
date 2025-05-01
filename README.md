@@ -19,6 +19,7 @@ ini.Key = "USERNAME"
 ini.Value = "taro"  ' 書き込み
 
 Debug.Print ini.Value  ' 読み込み
+Debug.Print ini.Item("GENERAL","USERNAME")  ' 読み込み
 
 ' ファイルに保存
 ini.SaveFile "C:\test.ini", adUTF8, adCRLF
