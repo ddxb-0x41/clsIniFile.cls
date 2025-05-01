@@ -27,34 +27,23 @@ ini.SaveFile "C:\test.ini", adUTF8, adCRLF
 ini.SetFile "C:\test.ini"
 ```
 
-主なメンバー
-プロパティ
+## 主なメンバー
+### プロパティ
 Section: 現在操作対象のセクション
-
 Key: 現在操作対象のキー
-
 Value: 指定セクション・キーの値を取得または設定
-
 Item(SectionName, KeyName): 任意のセクションとキーにアクセス
 
-メソッド
+### メソッド
 SetFile(FilePath, [CharacterCode], [LineFeedCode]): INIファイル読み込み
-
 SaveFile(FilePath, [CharacterCode], [LineFeedCode], [AddSectionUnitNewline]): INIファイル保存
-
 IsExistsSection(SectionName): セクションの存在確認
-
 IsExistsKey(SectionName, KeyName): キーの存在確認
-
 GetSections(): セクション名一覧取得
-
 GetSectionKeys(SectionName): 指定セクション内のキー一覧取得
-
 RemoveSection(SectionName): セクションの削除
-
 RemoveKey(SectionName, KeyName): キーの削除
 
-依存コンポーネント
+## 依存コンポーネント
 ADODB.Stream（文字コード対応のために使用）
-
 Scripting.FileSystemObject
