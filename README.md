@@ -1,21 +1,19 @@
-# clsIniFile - VBA INIファイル操作クラス
+# clsIniFile - VBA INI ファイル操作ユーティリティ
 
-このクラスモジュールは、INIファイルを簡単に読み書き・管理できるVBAクラスです。  
-セクション・キー単位で値の取得／設定／削除が可能で、文字コードや改行コードの指定にも対応しています。
+このクラスは、VBA（Visual Basic for Applications）環境で `.ini` ファイルの読み書きを簡単に行うためのユーティリティクラスです。
 
----
+## 概要
 
-## 特徴
-
-- `.ini` ファイルの読み書きに対応
-- セクション・キーごとのアクセス
-- 複数文字コード (`Shift_JIS`, `UTF-8`, `UTF-16`, `ASCII`)
-- 改行コードの自動検出と指定
-- `ThisWorkbook` と同名の `.ini` ファイルを自動読み込み
+- `Section`・`Key`・`Value` による設定ファイル構造をシンプルに扱えます。
+- 読み込み・追加・変更・削除はすべて**メモリ上の操作**です。
+- `SaveFile` メソッドにより任意のタイミングでファイルに保存可能。
+- 読み込み時、改行コードを自動検出します。
 
 ---
 
 ## インストール方法（Installation）
+
+このクラスは、VBA（Visual Basic for Applications）上で `.ini` 形式の設定ファイルを簡易的に読み書きするためのユーティリティです。設定はすべて**メモリ上で管理され**、明示的に保存操作を行うまでファイルには書き出されません。
 
 ### 1. クラスモジュールの追加
 
@@ -26,140 +24,131 @@
 
 ### 2. 使用準備
 
-- 任意の標準モジュールで次のようにインスタンスを作成します：
-
-## 初期化
+任意の標準モジュールで次のようにインスタンスを作成します：
 
 ```vba
 Dim ini As New clsIniFile
 ```
 
-- 初期化時に `ThisWorkbook` の `.ini` ファイルを自動読み込み  
-  例：`Sample.xlsm` → `Sample.ini`
+この時点で、自動的に `ThisWorkbook` と**同じフォルダ・同名の `.ini` ファイル**を読み込みます。
 
-- **読み込み時の初期設定**
-  - 文字コード：`Shift_JIS`
-  - 改行コード：自動判別
+例：  
+`Book1.xlsm` → `Book1.ini`
+
+> ※ ファイルが存在しない場合でもエラーにはならず、初期状態の空データとして内部に読み込まれます。  
+> ※ 読み込んだ `.ini` ファイルの内容は、インスタンス内の辞書構造で保持されます。  
+> ※ `SaveFile` メソッドを実行するまで、変更はファイルに反映されません。
 
 ---
 
-## 値の取得
+## 使い方（Usage）
+
+### 値の取得と設定
 
 ```vba
-Dim mode As String
-mode = ini.Item("SYSTEM", "MODE")
+' SectionとKeyを事前に設定
+ini.Section = "設定"
+ini.Key = "ユーザー名"
 
-' またはプロパティを使って
-ini.Section = "SYSTEM"
-ini.Key = "MODE"
-mode = ini.Value
+' 値を設定
+ini.Value = "Taro"
+
+' 値を取得
+Debug.Print ini.Value  ' => Taro
 ```
 
----
-
-## 値の設定・追加（※メモリ上のみ）
+### Item プロパティを使用した一括指定
 
 ```vba
-ini.Item("SYSTEM", "MODE") = "DEV"
+' 値の設定
+ini.Item("設定", "パス") = "C:\Temp"
 
-' またはプロパティを使って
-ini.Section = "SYSTEM"
-ini.Key = "MODE"
-ini.Value = "DEV"
+' 値の取得（この時 SectionとKeyにも格納される）
+Debug.Print ini.Item("設定", "パス")  ' => C:\Temp
 ```
 
-※この時点ではファイルは更新されません。  
-※ファイルへ反映するには `SaveFile` を明示的に実行してください。
+> ※ `Item("設定", "パス")` を実行すると、`.Section` と `.Key` プロパティも更新されます。
 
 ---
 
-## 削除（※メモリ上のみ）
+### セクション・キーの確認
 
 ```vba
-ini.RemoveKey "SYSTEM", "MODE"
-ini.RemoveSection "SYSTEM"
-```
-
-※削除もメモリ上での操作です。  
-※ファイルへ反映するには `SaveFile` が必要です。
-
----
-
-## 存在チェック
-
-```vba
-If ini.IsExistsSection("SYSTEM") Then
-    MsgBox "セクションあり"
+If ini.IsExistsSection("設定") Then
+    Debug.Print "セクションあり"
 End If
 
-If ini.IsExistsKey("SYSTEM", "MODE") Then
-    MsgBox "キーあり"
+If ini.IsExistsKey("設定", "ユーザー名") Then
+    Debug.Print "キーあり"
 End If
 ```
 
 ---
 
-## セクション／キー一覧の取得
+### セクションやキーの削除（メモリ上のみ）
 
 ```vba
-Dim sections As Variant
-sections = ini.GetSections()
+ini.RemoveKey "設定", "ユーザー名"
+ini.RemoveSection "ログ情報"
+```
 
-Dim keys As Variant
-keys = ini.GetSectionKeys("SYSTEM")
+> ※ 削除はすべて**メモリ上の操作**であり、`SaveFile` を呼び出すまでファイルに反映されません。
+
+---
+
+### セクション一覧・キー一覧の取得
+
+```vba
+Dim sec As Variant
+For Each sec In ini.GetSections()
+    Debug.Print sec
+Next
+
+Dim key As Variant
+For Each key In ini.GetSectionKeys("設定")
+    Debug.Print key
+Next
 ```
 
 ---
 
-## ファイルの保存
+### ファイルへの保存
 
 ```vba
-ini.SaveFile "C:\config.ini", adUTF8, adLF
+ini.SaveFile "C:\Temp\MySettings.ini"
 ```
 
-### 引数（省略可能）
+#### 保存時のオプション（省略可）
 
-| 引数 | 内容 | 既定値 |
-|------|------|--------|
-| FilePath | 保存先パス | 必須 |
-| CharacterCode | 書き込み時の文字コード | `adSHIFT_JIS` |
-| LineFeedCode | 改行コード | `adCRLF` |
-| AddSectionUnitNewline | セクション毎に空行を追加する | `True` |
+```vba
+ini.SaveFile "C:\Temp\MySettings.ini", adUTF8, adLF, True
+```
+
+- `文字コード`（EnumCharacterCode）：`adSHIFT_JIS`, `adUTF8`, `adUTF16`, `adASCII`
+- `改行コード`（EnumLineFeedCode）：`adCRLF`, `adCR`, `adLF`
+- `AddSectionUnitNewline`：セクションごとに空行を挿入するか
 
 ---
 
-## ファイルの再読み込み
+### 別のファイルを読み込む
 
 ```vba
-ini.SetFile "C:\config.ini", adUTF8
+ini.SetFile "C:\Temp\Other.ini"
 ```
 
-- 改行コードの指定を省略すると、自動検出されます。
+> ※ `SetFile` 実行後はその内容が現在のメモリに上書きされます。
 
 ---
 
-## 対応文字コード（EnumCharacterCode）
+## 初期値について
 
-```vba
-Enum EnumCharacterCode
-    adSHIFT_JIS = 932
-    adUTF8      = 65001
-    adUTF16     = 1200
-    adASCII     = 1252
-End Enum
-```
+- **読み込み対象ファイル**：  
+  `ThisWorkbook` と同じフォルダ、同名の `.ini` ファイルを自動的に読み込みます。
 
----
-
-## 対応改行コード（EnumLineFeedCode）
-
-```vba
-Enum EnumLineFeedCode
-    adCRLF = -1  ' \r\n (Windows)
-    adCR   = 13  ' \r   (Mac Classic)
-    adLF   = 10  ' \n   (Unix/Linux)
-End Enum
-```
+- **書き込み（保存）時の初期値**：  
+  - 文字コード：`Shift_JIS`（adSHIFT_JIS）  
+  - 改行コード：`CRLF`（adCRLF）  
+  - セクション毎に空行を追加：`True`
 
 ---
 
