@@ -128,7 +128,7 @@ ini.SetFile "C:\config.ini", adUTF8
 ## 対応文字コード（EnumCharacterCode）
 
 ```vba
-EnumCharacterCode
+Enum EnumCharacterCode
     adSHIFT_JIS = 932
     adUTF8      = 65001
     adUTF16     = 1200
@@ -141,7 +141,7 @@ End Enum
 ## 対応改行コード（EnumLineFeedCode）
 
 ```vba
-EnumLineFeedCode
+Enum EnumLineFeedCode
     adCRLF = -1  ' \r\n (Windows)
     adCR   = 13  ' \r   (Mac Classic)
     adLF   = 10  ' \n   (Unix/Linux)
